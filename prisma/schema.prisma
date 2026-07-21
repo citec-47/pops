@@ -1,0 +1,74 @@
+// Prisma schema for the puppy boutique.
+// SQLite for zero-config local dev. To go to production, switch the
+// datasource provider to "postgresql" and point DATABASE_URL at your host.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Breed {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  group       String // e.g. "Toy", "Working", "Sporting"
+  size        String // e.g. "Small", "Medium", "Large"
+  temperament String // short comma-free sentence
+  description String
+  heroImage   String? // path under /uploads or /breeds
+  puppies     Puppy[]
+  createdAt   DateTime @default(now())
+}
+
+model Puppy {
+  id          String       @id @default(cuid())
+  name        String
+  breed       Breed        @relation(fields: [breedId], references: [id], onDelete: Cascade)
+  breedId     String
+  sex         String // "Male" | "Female"
+  color       String
+  birthDate   DateTime
+  priceCents  Int
+  status      String       @default("AVAILABLE") // AVAILABLE | RESERVED | SOLD
+  featured    Boolean      @default(false)
+  description String
+  vetNotes    String? // vaccinations, microchip, health guarantee notes
+  images      PuppyImage[]
+  inquiries   Inquiry[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model PuppyImage {
+  id        String @id @default(cuid())
+  puppy     Puppy  @relation(fields: [puppyId], references: [id], onDelete: Cascade)
+  puppyId   String
+  url       String
+  alt       String @default("")
+  type      String @default("image") // "image" | "video"
+  sortOrder Int    @default(0)
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  puppy     Puppy?   @relation(fields: [puppyId], references: [id], onDelete: SetNull)
+  puppyId   String?
+  name      String
+  email     String
+  phone     String?
+  message   String
+  status    String   @default("NEW") // NEW | READ | ARCHIVED
+  createdAt DateTime @default(now())
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
