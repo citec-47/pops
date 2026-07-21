@@ -6,7 +6,7 @@ import { IllustratedPortrait } from "@/components/portrait";
 export const metadata: Metadata = {
   title: "Our Breeds",
   description:
-    "The small circle of breeds we raise at Willowbrook — Golden Retrievers, Cavaliers, French Bulldogs, Bernese Mountain Dogs, Australian Shepherds, and Goldendoodles.",
+    "The small circle of breeds we raise at Willowbrook: Golden Retrievers, Cavaliers, French Bulldogs, Bernese Mountain Dogs, Australian Shepherds, and Goldendoodles.",
 };
 
 export const dynamic = "force-dynamic";

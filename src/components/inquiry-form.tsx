@@ -52,8 +52,10 @@ export function InquiryForm({ puppyId, puppyName, compact }: Props) {
   if (state === "sent") {
     return (
       <div className="rounded-[var(--radius-xl)] border border-sage/40 bg-sage/10 p-8 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sage/20 text-2xl">
-          🐾
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sage/20 text-sage-deep">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
         </div>
         <h3 className="font-display text-2xl font-semibold text-ink">
           Message on its way!

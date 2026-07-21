@@ -29,7 +29,7 @@ export default function ContactPage() {
             <ContactRow label="Email" value="hello@willowbrook.test" href="mailto:hello@willowbrook.test" />
             <ContactRow label="Phone & text" value="(555) 123-4567" href="tel:+15551234567" />
             <ContactRow label="Where we are" value="Willow Hollow, Vermont" />
-            <ContactRow label="Visiting hours" value="By appointment, Thu–Sun" />
+            <ContactRow label="Visiting hours" value="By appointment, Thu to Sun" />
           </dl>
 
           <div className="mt-10 rounded-[var(--radius-xl)] border border-line bg-bone-deep/60 p-6">

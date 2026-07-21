@@ -19,7 +19,7 @@ export default function AboutPage() {
           <span className="italic text-clay">old-fashioned</span> idea of care.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-          We&rsquo;re Marta and Elias — a husband, a wife, three children, and a
+          We&rsquo;re Marta and Elias, a husband, a wife, three children, and a
           farmhouse full of wagging tails. What began with one beloved Golden
           and a single litter has grown, slowly and deliberately, into the work
           we love most.
@@ -45,7 +45,7 @@ export default function AboutPage() {
         <div className="prose-warm space-y-6 text-lg leading-relaxed text-ink-soft">
           <p>
             We don&rsquo;t run a kennel. Our puppies are born in a whelping box
-            beside the wood stove and graduate to the chaos of family life —
+            beside the wood stove and graduate to the chaos of family life:
             children&rsquo;s footsteps, the clatter of dinner, the doorbell, the
             wheelbarrow. By the time a pup is ready to leave, very little in the
             world frightens them. That steadiness is the single greatest gift we
@@ -53,7 +53,7 @@ export default function AboutPage() {
           </p>
           <p>
             We health-test every parent, keep our litters small, and place each
-            puppy ourselves — never through a broker or a pet store. We&rsquo;d
+            puppy ourselves, never through a broker or a pet store. We&rsquo;d
             rather a pup wait an extra month for the right home than go to the
             wrong one tomorrow.
           </p>
@@ -67,7 +67,7 @@ export default function AboutPage() {
               { t: "Health first, always", d: "OFA and genetic screening on our parents, a two-year health guarantee, and a lifetime of questions answered." },
               { t: "Small on purpose", d: "A few litters a year. We know every puppy's quirks and tell you the honest truth about each one." },
               { t: "Socialized from day three", d: "Early neurological stimulation, novel sounds and surfaces, gentle handling, and the start of crate training." },
-              { t: "Matched, not sold", d: "We ask about your life and recommend the pup we truly believe fits — even if it means a waitlist." },
+              { t: "Matched, not sold", d: "We ask about your life and recommend the pup we truly believe fits, even if it means a waitlist." },
             ].map((v) => (
               <div key={v.t}>
                 <h3 className="font-display text-xl font-semibold text-ink">

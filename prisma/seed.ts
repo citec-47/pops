@@ -44,7 +44,7 @@ const BREEDS = [
     size: "Large",
     temperament: "Gentle, eager to please, endlessly patient with children",
     description:
-      "The Golden is the quintessential family dog — devoted, playful, and soft-mouthed enough to carry an egg without cracking it. Ours are raised underfoot in the kitchen so they arrive confident and well-mannered.",
+      "The Golden is the quintessential family dog, devoted, playful, and soft-mouthed enough to carry an egg without cracking it. Ours are raised underfoot in the kitchen so they arrive confident and well-mannered.",
   },
   {
     slug: "cavalier-king-charles-spaniel",
@@ -62,7 +62,7 @@ const BREEDS = [
     size: "Small",
     temperament: "Comical, easygoing, quietly stubborn",
     description:
-      "All personality in a compact frame. The Frenchie is a low-exercise charmer that would rather make you laugh than take a long hike — a wonderful city companion.",
+      "All personality in a compact frame. The Frenchie is a low-exercise charmer that would rather make you laugh than take a long hike, a wonderful city companion.",
   },
   {
     slug: "bernese-mountain-dog",
@@ -185,7 +185,7 @@ const PUPPIES: SeedPuppy[] = [
     status: "AVAILABLE",
     featured: true,
     description:
-      "A teddy bear with the classic Bernese blaze. Sequoia is gentle and unflappable — thunderstorms, vacuums, and toddlers alike leave her unbothered.",
+      "A teddy bear with the classic Bernese blaze. Sequoia is gentle and unflappable, thunderstorms, vacuums, and toddlers alike leave her unbothered.",
     vetNotes:
       "First vaccinations · dewormed · microchipped · OFA-tested lineage · two-year health guarantee.",
   },
@@ -210,7 +210,7 @@ const PUPPIES: SeedPuppy[] = [
     price: 2600,
     status: "AVAILABLE",
     description:
-      "One blue eye, one brown, and a brain that never stops. Willa is looking for an active home with a job to do — agility, hiking, or herding the kids.",
+      "One blue eye, one brown, and a brain that never stops. Willa is looking for an active home with a job to do, agility, hiking, or herding the kids.",
     vetNotes:
       "First vaccinations · dewormed · microchipped · eye-cleared parents · health guarantee.",
   },
@@ -236,7 +236,7 @@ const PUPPIES: SeedPuppy[] = [
     price: 3300,
     status: "AVAILABLE",
     description:
-      "A firecracker with a feather-soft coat. Poppy loves water, fetch, and being the center of attention — a joyful pick for a lively household.",
+      "A firecracker with a feather-soft coat. Poppy loves water, fetch, and being the center of attention, a joyful pick for a lively household.",
     vetNotes:
       "Fully vaccinated for age · dewormed · microchipped · health guarantee.",
   },

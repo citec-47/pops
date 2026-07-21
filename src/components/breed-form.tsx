@@ -125,7 +125,7 @@ export function BreedForm({
           rows={5}
           defaultValue={initial.description}
           className={`${field} resize-none`}
-          placeholder="A paragraph about the breed — what families love, energy level, coat, who they suit…"
+          placeholder="A paragraph about the breed: what families love, energy level, coat, who they suit…"
         />
       </label>
 

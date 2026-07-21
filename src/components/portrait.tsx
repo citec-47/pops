@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-// Warm gradient pairs — chosen to sit within the brand palette.
+// Warm gradient pairs, chosen to sit within the brand palette.
 const PALETTES = [
   ["#f3ddc9", "#d9a679"],
   ["#e9d9c3", "#c99a3f"],

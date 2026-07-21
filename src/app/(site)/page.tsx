@@ -2,10 +2,10 @@ import Link from "next/link";
 import { getFeaturedPuppies, getBreeds, countAvailable } from "@/lib/data";
 import { PuppyCard } from "@/components/puppy-card";
 import { ButtonLink, SectionHeading } from "@/components/ui";
-import { IllustratedPortrait } from "@/components/portrait";
+import { IllustratedPortrait, PuppyPhoto } from "@/components/portrait";
 
 // The home page shows live inventory, so render on demand (never prerender
-// at build time — the database may be asleep during the build).
+// at build time, the database may be asleep during the build).
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
@@ -14,6 +14,8 @@ export default async function HomePage() {
     getBreeds(),
     countAvailable(),
   ]);
+
+  const [heroA, heroB] = featured;
 
   return (
     <>
@@ -34,7 +36,7 @@ export default async function HomePage() {
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">
               We&rsquo;re a small home nursery raising a handful of litters each
-              year — never more than we can hold, name, and love properly.
+              year, never more than we can hold, name, and love properly.
               Every puppy leaves us healthy, socialized, and ready for you.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
@@ -65,17 +67,39 @@ export default async function HomePage() {
             </dl>
           </div>
 
-          {/* Illustrated hero collage */}
+          {/* Hero photo collage: real puppies currently at the nursery */}
           <div className="relative animate-rise [animation-delay:120ms]">
             <div className="relative mx-auto aspect-[4/5] w-full max-w-sm">
-              <div className="absolute -right-3 top-6 h-[88%] w-[70%] rotate-3 overflow-hidden rounded-[var(--radius-xl)] border border-line bg-bone-deep shadow-[var(--shadow-soft)]">
-                <IllustratedPortrait seed="hero-golden" className="h-full w-full" />
-              </div>
-              <div className="absolute bottom-0 left-0 h-[70%] w-[62%] -rotate-3 overflow-hidden rounded-[var(--radius-xl)] border border-line bg-bone-deep shadow-[var(--shadow-soft)]">
-                <IllustratedPortrait seed="hero-cavalier-two" className="h-full w-full" />
-              </div>
+              <Link
+                href={heroA ? `/puppies/${heroA.id}` : "/puppies"}
+                className="group absolute -right-3 top-6 block h-[88%] w-[70%] rotate-3 overflow-hidden rounded-[var(--radius-xl)] border border-line bg-bone-deep shadow-[var(--shadow-soft)]"
+              >
+                <PuppyPhoto
+                  src={heroA?.images.find((m) => m.type !== "video")?.url}
+                  alt={heroA ? `${heroA.name}, a ${heroA.breed.name}` : "A Willowbrook puppy"}
+                  seed={heroA ? heroA.id + heroA.name : "hero-a"}
+                  priority
+                  sizes="(max-width: 1024px) 60vw, 22vw"
+                />
+                {heroA && (
+                  <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 px-3 py-1 text-xs font-semibold text-bone backdrop-blur-sm">
+                    {heroA.name}
+                  </span>
+                )}
+              </Link>
+              <Link
+                href={heroB ? `/puppies/${heroB.id}` : "/puppies"}
+                className="group absolute bottom-0 left-0 block h-[70%] w-[62%] -rotate-3 overflow-hidden rounded-[var(--radius-xl)] border-4 border-bone bg-bone-deep shadow-[var(--shadow-soft)]"
+              >
+                <PuppyPhoto
+                  src={heroB?.images.find((m) => m.type !== "video")?.url}
+                  alt={heroB ? `${heroB.name}, a ${heroB.breed.name}` : "A Willowbrook puppy"}
+                  seed={heroB ? heroB.id + heroB.name : "hero-b"}
+                  sizes="(max-width: 1024px) 55vw, 20vw"
+                />
+              </Link>
               <div className="absolute -left-4 top-2 rounded-full border border-line bg-paper px-4 py-2 text-xs font-semibold text-ink shadow-[var(--shadow-soft)]">
-                🐾 Raised underfoot
+                Raised underfoot in Vermont
               </div>
             </div>
           </div>
@@ -110,7 +134,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <p className="mt-10 rounded-[var(--radius-xl)] border border-dashed border-line bg-paper p-10 text-center text-muted">
-            No featured puppies right now — please check the full nursery.
+            No featured puppies right now. Please check the full nursery.
           </p>
         )}
       </section>
@@ -205,7 +229,7 @@ export default async function HomePage() {
           <p className="mx-auto mt-4 max-w-xl text-bone/70">
             Visits are by appointment so each family gets our full attention.
             Tell us a little about your home and we&rsquo;ll help you find the
-            right match — no pressure, ever.
+            right match, no pressure, ever.
           </p>
           <div className="mt-8 flex justify-center">
             <Link

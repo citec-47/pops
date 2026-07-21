@@ -10,7 +10,7 @@ export function SiteFooter() {
             <Logo />
             <p className="mt-5 text-sm leading-relaxed text-muted">
               A small, family-run nursery in the hills. We raise a handful of
-              litters each year — never more than we can love properly.
+              litters each year, never more than we can love properly.
             </p>
           </div>
 

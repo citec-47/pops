@@ -18,7 +18,7 @@ export async function generateMetadata({
   const puppy = await getPuppyById(id);
   if (!puppy) return { title: "Puppy not found" };
   return {
-    title: `${puppy.name} — ${puppy.breed.name}`,
+    title: `${puppy.name} · ${puppy.breed.name}`,
     description: puppy.description.slice(0, 155),
   };
 }
@@ -118,7 +118,7 @@ export default async function PuppyDetailPage({
             <p className="mt-2 mb-6 text-muted">
               {available
                 ? "Send us a note and we'll arrange a meet-and-greet or a video call. A deposit reserves your pup."
-                : "This little one may be spoken for, but tell us what you're looking for — we often have similar pups or upcoming litters."}
+                : "This little one may be spoken for, but tell us what you're looking for, and we often have similar pups or upcoming litters."}
             </p>
             <InquiryForm puppyId={puppy.id} puppyName={puppy.name} compact />
           </div>

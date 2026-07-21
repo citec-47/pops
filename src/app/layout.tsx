@@ -16,13 +16,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("http://localhost:3000"),
   title: {
-    default: "Willowbrook — Boutique Puppies, Raised With Care",
+    default: "Willowbrook · Boutique Puppies, Raised With Care",
     template: "%s · Willowbrook",
   },
   description:
     "A small family nursery raising healthy, well-socialized puppies. Meet our available litters, learn about each breed, and reserve your companion.",
   openGraph: {
-    title: "Willowbrook — Boutique Puppies, Raised With Care",
+    title: "Willowbrook · Boutique Puppies, Raised With Care",
     description:
       "A small family nursery raising healthy, well-socialized puppies.",
     type: "website",
