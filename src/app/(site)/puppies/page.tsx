@@ -22,6 +22,24 @@ export default async function PuppiesPage({
     getBreeds(),
   ]);
 
+  const GROUP_ORDER = [
+    "Sporting",
+    "Hound",
+    "Working",
+    "Terrier",
+    "Toy",
+    "Non-Sporting",
+    "Herding",
+    "Hybrid",
+  ];
+  const breedGroups = [
+    ...GROUP_ORDER.map((group) => ({
+      group,
+      breeds: breeds.filter((b) => b.group === group),
+    })),
+    { group: "Other", breeds: breeds.filter((b) => !GROUP_ORDER.includes(b.group)) },
+  ].filter((g) => g.breeds.length > 0);
+
   const statusFilters = [
     { key: undefined, label: "All" },
     { key: "AVAILABLE", label: "Available" },
@@ -54,23 +72,49 @@ export default async function PuppiesPage({
 
       {/* Filters */}
       <div className="mt-10 space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted">
+        {/* The catalog spans dozens of breeds, so this one is a select
+            rather than a wall of pills. It works without JavaScript. */}
+        <form method="get" action="/puppies" className="flex flex-wrap items-center gap-2">
+          {status && <input type="hidden" name="status" value={status} />}
+          <label
+            htmlFor="breed"
+            className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted"
+          >
             Breed
-          </span>
-          <FilterPill href={href({ breed: undefined })} active={!breed}>
-            All breeds
-          </FilterPill>
-          {breeds.map((b) => (
-            <FilterPill
-              key={b.id}
-              href={href({ breed: b.slug })}
-              active={breed === b.slug}
+          </label>
+          <select
+            id="breed"
+            name="breed"
+            defaultValue={breed ?? ""}
+            className="rounded-full border border-line bg-paper px-3.5 py-1.5 text-sm font-medium text-ink-soft focus:border-clay focus:outline-none"
+          >
+            <option value="">All breeds</option>
+            {breedGroups.map((g) => (
+              <optgroup key={g.group} label={g.group}>
+                {g.breeds.map((b) => (
+                  <option key={b.id} value={b.slug}>
+                    {b.name}
+                    {b._count.puppies > 0 ? ` (${b._count.puppies})` : ""}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="rounded-full border border-ink bg-ink px-3.5 py-1.5 text-sm font-medium text-bone hover:bg-clay-deep"
+          >
+            Show
+          </button>
+          {breed && (
+            <Link
+              href={href({ breed: undefined })}
+              className="text-sm font-medium text-muted hover:text-clay"
             >
-              {b.name}
-            </FilterPill>
-          ))}
-        </div>
+              Clear
+            </Link>
+          )}
+        </form>
         <div className="flex flex-wrap items-center gap-2">
           <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted">
             Status

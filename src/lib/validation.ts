@@ -44,6 +44,7 @@ export const breedSchema = z.object({
     .min(1, "Add a short temperament line.")
     .max(160),
   description: z.string().trim().min(1, "Add a description.").max(2000),
+  heroImage: z.string().trim().optional().or(z.literal("")),
 });
 
 export type BreedInput = z.infer<typeof breedSchema>;

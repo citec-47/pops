@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getFeaturedPuppies, getBreeds, countAvailable } from "@/lib/data";
 import { PuppyCard } from "@/components/puppy-card";
 import { ButtonLink, SectionHeading } from "@/components/ui";
-import { IllustratedPortrait, PuppyPhoto } from "@/components/portrait";
+import { PuppyPhoto } from "@/components/portrait";
 
 // The home page shows live inventory, so render on demand (never prerender
 // at build time, the database may be asleep during the build).
@@ -16,6 +16,15 @@ export default async function HomePage() {
   ]);
 
   const [heroA, heroB] = featured;
+
+  // The catalog runs to dozens of breeds, so the home page shows a sample:
+  // the ones with puppies on the ground first, then the rest alphabetically.
+  const breedPreview = [...breeds]
+    .sort(
+      (a, b) =>
+        b._count.puppies - a._count.puppies || a.name.localeCompare(b.name),
+    )
+    .slice(0, 9);
 
   return (
     <>
@@ -187,17 +196,17 @@ export default async function HomePage() {
         <SectionHeading
           eyebrow="Find your fit"
           title="The breeds we know by heart"
-          intro="We specialize in a small circle of breeds so we can raise each one exceptionally well."
+          intro={`${breeds.length} breeds across every group, from toy companions to working giants, each raised by us or by a partner family we have known for years.`}
         />
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {breeds.map((b) => (
+          {breedPreview.map((b) => (
             <Link
               key={b.id}
               href={`/breeds/${b.slug}`}
               className="group flex items-center gap-4 rounded-[var(--radius-xl)] border border-line bg-paper p-4 transition-colors hover:border-clay/40"
             >
               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-bone-deep">
-                <IllustratedPortrait seed={b.slug} className="h-full w-full" />
+                <PuppyPhoto src={b.heroImage} alt={`${b.name} dog`} seed={b.slug} sizes="64px" />
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="font-display text-lg font-semibold text-ink group-hover:text-clay">
@@ -212,6 +221,14 @@ export default async function HomePage() {
               </span>
             </Link>
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link
+            href="/breeds"
+            className="text-sm font-semibold text-clay hover:underline"
+          >
+            See all {breeds.length} breeds &rarr;
+          </Link>
         </div>
       </section>
 

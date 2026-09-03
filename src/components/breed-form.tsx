@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 type ActionState = { error?: string } | undefined;
@@ -16,6 +17,7 @@ export type BreedInitial = {
   size?: string;
   temperament?: string;
   description?: string;
+  heroImage?: string | null;
 };
 
 const GROUPS = [
@@ -45,6 +47,25 @@ export function BreedForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
+  const [heroImage, setHeroImage] = useState<string>(initial.heroImage ?? "");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleFile(file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && body.url) setHeroImage(body.url);
+      else setUploadError(body.error ?? "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   return (
     <form
@@ -52,6 +73,53 @@ export function BreedForm({
       className="max-w-2xl space-y-5 rounded-[var(--radius-xl)] border border-line bg-paper p-6"
     >
       {initial.id && <input type="hidden" name="id" value={initial.id} />}
+      <input type="hidden" name="heroImage" value={heroImage} />
+
+      {/* Breed photo */}
+      <div>
+        <span className={labelCls}>Breed photo</span>
+        <div className="flex items-center gap-4">
+          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-line bg-bone-deep">
+            {heroImage ? (
+              <Image src={heroImage} alt="" fill sizes="96px" className="object-cover" />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-xs text-muted">
+                No photo
+              </span>
+            )}
+          </div>
+          <div className="space-y-2">
+            <label className="inline-block cursor-pointer rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-clay hover:text-clay">
+              {uploading ? "Uploading…" : heroImage ? "Replace photo" : "Upload photo"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => handleFile(e.target.files?.[0])}
+              />
+            </label>
+            {heroImage && (
+              <button
+                type="button"
+                onClick={() => setHeroImage("")}
+                className="ml-2 text-sm text-muted hover:text-clay-deep"
+              >
+                Remove
+              </button>
+            )}
+            <p className="text-xs text-muted">
+              A representative photo of the breed. If empty, an illustrated
+              portrait is shown.
+            </p>
+          </div>
+        </div>
+        {uploadError && (
+          <p className="mt-2 rounded-lg bg-clay-soft/60 px-3 py-2 text-xs text-clay-deep">
+            {uploadError}
+          </p>
+        )}
+      </div>
 
       <label className="block">
         <span className={labelCls}>Breed name</span>

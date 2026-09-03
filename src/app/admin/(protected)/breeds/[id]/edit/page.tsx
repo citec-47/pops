@@ -35,6 +35,7 @@ export default async function EditBreedPage({
           size: breed.size,
           temperament: breed.temperament,
           description: breed.description,
+          heroImage: breed.heroImage,
         }}
       />
     </div>

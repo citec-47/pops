@@ -234,6 +234,7 @@ function parseBreedForm(formData: FormData) {
     size: formData.get("size"),
     temperament: formData.get("temperament"),
     description: formData.get("description"),
+    heroImage: formData.get("heroImage"),
   });
 }
 
@@ -248,7 +249,11 @@ export async function createBreedAction(
   }
   const d = parsed.data;
   await prisma.breed.create({
-    data: { ...d, slug: await uniqueBreedSlug(d.name) },
+    data: {
+      ...d,
+      heroImage: d.heroImage || null,
+      slug: await uniqueBreedSlug(d.name),
+    },
   });
 
   revalidatePath("/admin/breeds");
@@ -272,7 +277,11 @@ export async function updateBreedAction(
   const d = parsed.data;
   await prisma.breed.update({
     where: { id },
-    data: { ...d, slug: await uniqueBreedSlug(d.name, id) },
+    data: {
+      ...d,
+      heroImage: d.heroImage || null,
+      slug: await uniqueBreedSlug(d.name, id),
+    },
   });
 
   revalidatePath("/admin/breeds");

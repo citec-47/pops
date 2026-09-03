@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getBreedBySlug, getPuppies } from "@/lib/data";
 import { PuppyCard } from "@/components/puppy-card";
-import { IllustratedPortrait } from "@/components/portrait";
+import { PuppyPhoto } from "@/components/portrait";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +59,12 @@ export default async function BreedDetailPage({
               </p>
             </div>
             <div className="relative mx-auto aspect-square w-48 overflow-hidden rounded-[var(--radius-xl)] border border-line bg-bone shadow-[var(--shadow-soft)] md:w-full">
-              <IllustratedPortrait seed={breed.slug} className="h-full w-full" />
+              <PuppyPhoto
+                src={breed.heroImage}
+                alt={`${breed.name} dog`}
+                seed={breed.slug}
+                sizes="(max-width: 768px) 192px, 260px"
+              />
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { IllustratedPortrait } from "@/components/portrait";
+import { PuppyPhoto } from "@/components/portrait";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { deleteBreedAction } from "../../actions";
 
@@ -63,7 +63,7 @@ export default async function AdminBreedsPage({
                 className="flex flex-wrap items-center gap-4 px-4 py-3 sm:px-6"
               >
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-bone-deep">
-                  <IllustratedPortrait seed={b.slug} className="h-full w-full" />
+                  <PuppyPhoto src={b.heroImage} alt={`${b.name} dog`} seed={b.slug} sizes="56px" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-lg font-semibold text-ink">
