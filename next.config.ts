@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     root: path.join(__dirname),
   },
   images: {
+    // Remote photos (dog.ceo) can be slow to fetch; hold the optimized copies
+    // for a month so a visitor only ever waits on the first request.
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       // Real sample dog photos used for the demo puppies.
       { protocol: "https", hostname: "images.dog.ceo" },

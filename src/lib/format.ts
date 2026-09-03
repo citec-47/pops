@@ -37,3 +37,14 @@ const STATUS_LABELS: Record<string, string> = {
 export function statusLabel(status: string): string {
   return STATUS_LABELS[status] ?? status;
 }
+
+/**
+ * Puppies go home at eight weeks. Returns "Ready now" once that date has
+ * passed, otherwise a short date like "Oct 12".
+ */
+export function readyToGoHome(birthDate: Date | string): string {
+  const d = new Date(birthDate);
+  d.setDate(d.getDate() + 56);
+  if (d.getTime() <= Date.now()) return "Ready now";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}

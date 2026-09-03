@@ -28,8 +28,8 @@ export function SiteFooter() {
             <h3 className="eyebrow mb-4">Get in Touch</h3>
             <ul className="space-y-2.5 text-sm text-ink-soft">
               <li>
-                <a href="mailto:hello@willowbrook.test" className="hover:text-clay">
-                  hello@willowbrook.test
+                <a href="mailto:careforepuppies21@gmail.com" className="hover:text-clay">
+                  careforepuppies21@gmail.com
                 </a>
               </li>
               <li>

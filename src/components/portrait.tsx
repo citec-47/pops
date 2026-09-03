@@ -77,6 +77,16 @@ export function IllustratedPortrait({
 }
 
 /**
+ * The dog.ceo sample photos are already small (roughly 40KB at 700px), and
+ * the route to that CDN is slow enough that the image optimizer regularly
+ * gives up mid-fetch and leaves a broken thumbnail. Serve those straight from
+ * the source; our own Cloudinary uploads still go through the optimizer.
+ */
+export function isSamplePhoto(src: string): boolean {
+  return src.startsWith("https://images.dog.ceo/");
+}
+
+/**
  * Renders an uploaded photo when present, otherwise the illustrated fallback.
  */
 export function PuppyPhoto({
@@ -102,6 +112,7 @@ export function PuppyPhoto({
         fill
         sizes={sizes ?? "(max-width: 768px) 100vw, 33vw"}
         priority={priority}
+        unoptimized={isSamplePhoto(src)}
         className={`object-cover ${className}`}
       />
     );

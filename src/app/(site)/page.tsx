@@ -1,188 +1,302 @@
 import Link from "next/link";
-import { getFeaturedPuppies, getBreeds, countAvailable } from "@/lib/data";
-import { PuppyCard } from "@/components/puppy-card";
-import { ButtonLink, SectionHeading } from "@/components/ui";
+import { getPuppies, getBreeds, countAvailable } from "@/lib/data";
 import { PuppyPhoto } from "@/components/portrait";
+import { formatPrice, formatAge, formatDate, readyToGoHome } from "@/lib/format";
 
 // The home page shows live inventory, so render on demand (never prerender
 // at build time, the database may be asleep during the build).
 export const dynamic = "force-dynamic";
 
+const PHONE = "(555) 123-4567";
+const PHONE_HREF = "tel:+15551234567";
+const EMAIL = "careforepuppies21@gmail.com";
+
 export default async function HomePage() {
-  const [featured, breeds, available] = await Promise.all([
-    getFeaturedPuppies(3),
+  const [availablePuppies, breeds, available] = await Promise.all([
+    getPuppies({ status: "AVAILABLE" }),
     getBreeds(),
     countAvailable(),
   ]);
 
-  const [heroA, heroB] = featured;
-
-  // The catalog runs to dozens of breeds, so the home page shows a sample:
-  // the ones with puppies on the ground first, then the rest alphabetically.
-  const breedPreview = [...breeds]
+  // Oldest first, so the pup closest to going home leads the photo slot.
+  const readySoonest = [...availablePuppies].sort(
+    (a, b) => +new Date(a.birthDate) - +new Date(b.birthDate),
+  );
+  // The table itself reads like our own inventory sheet: by breed, then name.
+  const listed = [...availablePuppies]
     .sort(
       (a, b) =>
-        b._count.puppies - a._count.puppies || a.name.localeCompare(b.name),
+        a.breed.name.localeCompare(b.breed.name) ||
+        a.name.localeCompare(b.name),
     )
-    .slice(0, 9);
+    .slice(0, 12);
+
+  // One photo for the top of the page, from a pup who actually has one.
+  const cover =
+    readySoonest.find((p) => p.images.some((m) => m.type !== "video")) ??
+    readySoonest[0];
+  const coverPhoto = cover?.images.find((m) => m.type !== "video");
+
+  const lastUpdated = availablePuppies.reduce<Date | null>((latest, p) => {
+    const d = new Date(p.createdAt);
+    return !latest || d > latest ? d : latest;
+  }, null);
+
+  // Breeds with pups on the ground, grouped the way we talk about them.
+  const withPuppies = breeds.filter((b) => b._count.puppies > 0);
+  const groupNames = [...new Set(withPuppies.map((b) => b.group))].sort();
 
   return (
     <>
       {/* ---------------------------------------------------------------- */}
-      {/*  Hero                                                            */}
+      {/*  Who we are, and how to reach us                                 */}
       {/* ---------------------------------------------------------------- */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-14 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:pb-24 lg:pt-20">
-          <div className="animate-rise">
-            <p className="eyebrow mb-5 flex items-center gap-3">
-              <span className="h-px w-8 bg-clay" />
-              Willow Hollow, Vermont · Est. 2009
-            </p>
-            <h1 className="font-display text-[2.75rem] font-semibold leading-[1.02] text-ink sm:text-6xl">
-              Little companions,
-              <br />
-              <span className="italic text-clay">raised like family.</span>
+      <section className="mx-auto max-w-6xl px-5 pb-14 pt-10 sm:px-8">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+          <div>
+            <h1 className="font-display text-[2.3rem] font-semibold leading-[1.1] text-ink sm:text-5xl">
+              Puppies raised in our kitchen in Willow&nbsp;Hollow, Vermont.
             </h1>
-            <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">
-              We&rsquo;re a small home nursery raising a handful of litters each
-              year, never more than we can hold, name, and love properly.
-              Every puppy leaves us healthy, socialized, and ready for you.
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-soft">
+              We&rsquo;re Marta and Elias. We&rsquo;ve been raising litters at
+              home since 2009 and we place every puppy ourselves, no brokers,
+              no pet stores, no shipping. If you want a puppy from us you come
+              out to the farm and meet the parents first.
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-4">
-              <ButtonLink href="/puppies">
-                Meet the puppies
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
-                  <path d="M6 3l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </ButtonLink>
-              <ButtonLink href="/breeds" variant="outline">
-                Explore our breeds
-              </ButtonLink>
-            </div>
+            <p className="mt-4 max-w-xl leading-relaxed text-muted">
+              The list further down this page is what is actually on the ground
+              today. When a pup is reserved we mark it the same afternoon, so
+              what you see is what is left.
+            </p>
 
-            <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-line pt-8">
-              {[
-                { n: `${available}`, l: "Puppies available now" },
-                { n: "15 yrs", l: "Raising healthy litters" },
-                { n: "2-yr", l: "Written health guarantee" },
-              ].map((s) => (
-                <div key={s.l}>
-                  <dt className="font-display text-3xl font-semibold text-ink">
-                    {s.n}
-                  </dt>
-                  <dd className="mt-1 text-xs leading-snug text-muted">{s.l}</dd>
-                </div>
-              ))}
+            <dl className="mt-8 grid gap-x-10 gap-y-3 border-t border-line pt-6 text-sm sm:grid-cols-2">
+              <div className="flex gap-2">
+                <dt className="text-muted">Call or text</dt>
+                <dd>
+                  <a href={PHONE_HREF} className="font-semibold text-ink hover:text-clay">
+                    {PHONE}
+                  </a>
+                </dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-muted">Email</dt>
+                <dd className="min-w-0">
+                  <a
+                    href={`mailto:${EMAIL}`}
+                    className="break-all font-semibold text-ink hover:text-clay"
+                  >
+                    {EMAIL}
+                  </a>
+                </dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-muted">Visits</dt>
+                <dd className="text-ink-soft">Thu&ndash;Sun, by appointment</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-muted">Pickup</dt>
+                <dd className="text-ink-soft">
+                  At the farm, or we meet long drives halfway
+                </dd>
+              </div>
             </dl>
           </div>
 
-          {/* Hero photo collage: real puppies currently at the nursery */}
-          <div className="relative animate-rise [animation-delay:120ms]">
-            <div className="relative mx-auto aspect-[4/5] w-full max-w-sm">
-              <Link
-                href={heroA ? `/puppies/${heroA.id}` : "/puppies"}
-                className="group absolute -right-3 top-6 block h-[88%] w-[70%] rotate-3 overflow-hidden rounded-[var(--radius-xl)] border border-line bg-bone-deep shadow-[var(--shadow-soft)]"
-              >
+          {cover && (
+            <figure className="lg:pt-2">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-xl)] border border-line bg-bone-deep">
                 <PuppyPhoto
-                  src={heroA?.images.find((m) => m.type !== "video")?.url}
-                  alt={heroA ? `${heroA.name}, a ${heroA.breed.name}` : "A Willowbrook puppy"}
-                  seed={heroA ? heroA.id + heroA.name : "hero-a"}
-                  priority
-                  sizes="(max-width: 1024px) 60vw, 22vw"
+                  src={coverPhoto?.url}
+                  alt={coverPhoto?.alt || `${cover.name}, a ${cover.breed.name}`}
+                  seed={cover.id + cover.name}
+                  sizes="(max-width: 1024px) 100vw, 40vw"
                 />
-                {heroA && (
-                  <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 px-3 py-1 text-xs font-semibold text-bone backdrop-blur-sm">
-                    {heroA.name}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href={heroB ? `/puppies/${heroB.id}` : "/puppies"}
-                className="group absolute bottom-0 left-0 block h-[70%] w-[62%] -rotate-3 overflow-hidden rounded-[var(--radius-xl)] border-4 border-bone bg-bone-deep shadow-[var(--shadow-soft)]"
-              >
-                <PuppyPhoto
-                  src={heroB?.images.find((m) => m.type !== "video")?.url}
-                  alt={heroB ? `${heroB.name}, a ${heroB.breed.name}` : "A Willowbrook puppy"}
-                  seed={heroB ? heroB.id + heroB.name : "hero-b"}
-                  sizes="(max-width: 1024px) 55vw, 20vw"
-                />
-              </Link>
-              <div className="absolute -left-4 top-2 rounded-full border border-line bg-paper px-4 py-2 text-xs font-semibold text-ink shadow-[var(--shadow-soft)]">
-                Raised underfoot in Vermont
               </div>
-            </div>
-          </div>
+              <figcaption className="mt-2 text-sm text-muted">
+                {cover.name}, {cover.breed.name.toLowerCase()},{" "}
+                {formatAge(cover.birthDate)}.{" "}
+                <Link href={`/puppies/${cover.id}`} className="text-clay hover:underline">
+                  See the full listing
+                </Link>
+              </figcaption>
+            </figure>
+          )}
         </div>
-
-        <div className="pointer-events-none absolute -right-40 top-10 -z-10 h-96 w-96 rounded-full bg-clay-soft/50 blur-3xl" />
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/*  Featured                                                        */}
+      {/*  What is available right now                                     */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="border-y border-line bg-paper">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
+            <h2 className="font-display text-3xl font-semibold text-ink">
+              Available now
+            </h2>
+            {lastUpdated && (
+              <p className="text-sm text-muted">
+                {available} puppies unreserved · list updated{" "}
+                {formatDate(lastUpdated)}
+              </p>
+            )}
+          </div>
+
+          {listed.length > 0 ? (
+            <>
+              <div className="mt-6 overflow-x-auto">
+                <table className="w-full min-w-[42rem] border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
+                      <th className="py-2 pr-4 font-semibold">Puppy</th>
+                      <th className="py-2 pr-4 font-semibold">Breed</th>
+                      <th className="py-2 pr-4 font-semibold">Sex &amp; coat</th>
+                      <th className="py-2 pr-4 font-semibold">Age</th>
+                      <th className="py-2 pr-4 font-semibold">Goes home</th>
+                      <th className="py-2 pr-4 font-semibold">Price</th>
+                      <th className="py-2 font-semibold" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {listed.map((p) => {
+                      const photo = p.images.find((m) => m.type !== "video");
+                      return (
+                        <tr key={p.id} className="border-b border-line/70">
+                          <td className="py-3 pr-4">
+                            <div className="flex items-center gap-3">
+                              <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-bone-deep">
+                                <PuppyPhoto
+                                  src={photo?.url}
+                                  alt={photo?.alt || p.name}
+                                  seed={p.id + p.name}
+                                  sizes="44px"
+                                />
+                              </div>
+                              <span className="font-display text-base font-semibold text-ink">
+                                {p.name}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3 pr-4 text-ink-soft">{p.breed.name}</td>
+                          <td className="py-3 pr-4 text-muted">
+                            {p.sex} · {p.color}
+                          </td>
+                          <td className="py-3 pr-4 text-muted">
+                            {formatAge(p.birthDate)}
+                          </td>
+                          <td className="py-3 pr-4 text-ink-soft">
+                            {readyToGoHome(p.birthDate)}
+                          </td>
+                          <td className="py-3 pr-4 font-semibold text-ink">
+                            {formatPrice(p.priceCents)}
+                          </td>
+                          <td className="py-3">
+                            <Link
+                              href={`/puppies/${p.id}`}
+                              className="font-semibold text-clay hover:underline"
+                            >
+                              Details
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                <Link href="/puppies" className="font-semibold text-clay hover:underline">
+                  See all {available} available puppies
+                </Link>
+                <Link
+                  href="/puppies?status=RESERVED"
+                  className="text-ink-soft hover:text-clay"
+                >
+                  Recently reserved
+                </Link>
+              </div>
+
+              <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted">
+                Prices include the first course of shots, deworming, a
+                microchip, and the two-year health guarantee. A $300 deposit
+                holds a puppy for two weeks while you arrange the drive; the
+                balance is due on go-home day. We do not take deposits on a
+                litter before the pups are five weeks old.
+              </p>
+            </>
+          ) : (
+            <p className="mt-6 max-w-2xl leading-relaxed text-muted">
+              Nothing unreserved at the moment, which happens most summers.{" "}
+              <Link href="/contact" className="font-semibold text-clay hover:underline">
+                Send us a note
+              </Link>{" "}
+              and we&rsquo;ll tell you which litters are due.
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/*  How the pups are raised                                         */}
       {/* ---------------------------------------------------------------- */}
       <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <SectionHeading
-            eyebrow="Ready for their people"
-            title="This season's little ones"
-            intro="A few of the pups currently looking for their forever homes. New litters are announced here first."
-          />
-          <Link
-            href="/puppies"
-            className="hidden shrink-0 text-sm font-semibold text-clay hover:underline sm:inline"
-          >
-            View all puppies →
-          </Link>
-        </div>
-
-        {featured.length > 0 ? (
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((p) => (
-              <PuppyCard key={p.id} puppy={p} />
-            ))}
-          </div>
-        ) : (
-          <p className="mt-10 rounded-[var(--radius-xl)] border border-dashed border-line bg-paper p-10 text-center text-muted">
-            No featured puppies right now. Please check the full nursery.
-          </p>
-        )}
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
-      {/*  Philosophy                                                      */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="border-y border-line bg-bone-deep/60">
-        <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-2 lg:items-center">
-          <div>
-            <SectionHeading
-              eyebrow="How we raise them"
-              title={<>Not a kennel. <span className="italic text-clay">A home.</span></>}
-              intro="Our puppies are born in the living room and spend their first weeks meeting the vacuum, the mail carrier, the grandchildren, and the occasional barn cat. That early confidence is the difference you feel for a lifetime."
-            />
-            <div className="mt-8">
-              <ButtonLink href="/about" variant="ghost">
-                Read our story
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
-                  <path d="M6 3l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </ButtonLink>
+        <div className="grid gap-12 lg:grid-cols-[1fr_0.72fr]">
+          <div className="max-w-2xl">
+            <h2 className="font-display text-3xl font-semibold text-ink">
+              How the pups are raised
+            </h2>
+            <div className="mt-5 space-y-4 leading-relaxed text-ink-soft">
+              <p>
+                Litters are whelped in a box beside the wood stove in the
+                kitchen, which is the loudest room in the house, and that is
+                the point. By three weeks they have met the vacuum, the kettle,
+                the grandchildren, and the barn cat, who is not impressed.
+                Nothing much rattles a pup that grew up in the middle of all
+                that.
+              </p>
+              <p>
+                Dr. Rennick at Willow Hollow Veterinary sees every litter at six
+                weeks and again before they leave. You get the paperwork in a
+                folder, not a promise: vaccination record, microchip number,
+                worming dates, and both parents&rsquo; health screening.
+              </p>
+              <p>
+                We are honest about the dogs, including the ones we would not
+                sell you. If you have a small flat and two jobs we will tell
+                you a Malinois is a bad idea and point you at a Cavalier
+                instead. Nobody has ever been upset with us for that.
+              </p>
             </div>
+            <p className="mt-6 font-display text-lg text-clay">
+              &mdash; Marta &amp; Elias
+            </p>
+            <Link
+              href="/about"
+              className="mt-4 inline-block text-sm font-semibold text-clay hover:underline"
+            >
+              More about the farm and the dogs
+            </Link>
           </div>
-          <ul className="grid gap-4 sm:grid-cols-2">
+
+          <ul className="space-y-4 border-t border-line pt-6 text-sm lg:border-l lg:border-t-0 lg:pl-10 lg:pt-2">
             {[
-              { t: "Vet-checked & vaccinated", d: "Every pup leaves with age-appropriate shots, deworming, and a clean bill of health." },
-              { t: "Health-tested parents", d: "We screen our sires and dams so you start with the best odds of a long, healthy life." },
-              { t: "Early socialization", d: "Sounds, surfaces, handling, and gentle crate training from week three." },
-              { t: "Lifetime support", d: "We answer the 2 a.m. questions long after your puppy comes home." },
-            ].map((f) => (
-              <li
-                key={f.t}
-                className="rounded-[var(--radius-xl)] border border-line bg-paper p-5 shadow-[var(--shadow-soft)]"
-              >
-                <h3 className="font-display text-lg font-semibold text-ink">
-                  {f.t}
-                </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted">{f.d}</p>
+              ["Go-home age", "Eight weeks, ten for the toy breeds"],
+              ["Included", "Shots, worming, microchip, folder of records"],
+              [
+                "Guarantee",
+                "Two years, in writing, on the genetic conditions we screen for",
+              ],
+              ["Waitlist", "Three to five months on the popular breeds"],
+              [
+                "Shipping",
+                "None. Pickup only, or a halfway meet if you are driving far",
+              ],
+            ].map(([k, v]) => (
+              <li key={k}>
+                <span className="block text-xs uppercase tracking-wider text-muted">
+                  {k}
+                </span>
+                <span className="text-ink-soft">{v}</span>
               </li>
             ))}
           </ul>
@@ -190,74 +304,116 @@ export default async function HomePage() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/*  Breeds                                                          */}
+      {/*  Breeds index                                                    */}
       {/* ---------------------------------------------------------------- */}
-      <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
-        <SectionHeading
-          eyebrow="Find your fit"
-          title="The breeds we know by heart"
-          intro={`${breeds.length} breeds across every group, from toy companions to working giants, each raised by us or by a partner family we have known for years.`}
-        />
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {breedPreview.map((b) => (
-            <Link
-              key={b.id}
-              href={`/breeds/${b.slug}`}
-              className="group flex items-center gap-4 rounded-[var(--radius-xl)] border border-line bg-paper p-4 transition-colors hover:border-clay/40"
-            >
-              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-bone-deep">
-                <PuppyPhoto src={b.heroImage} alt={`${b.name} dog`} seed={b.slug} sizes="64px" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-display text-lg font-semibold text-ink group-hover:text-clay">
-                  {b.name}
+      <section className="border-t border-line bg-bone-deep/50">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+          <h2 className="font-display text-3xl font-semibold text-ink">
+            Breeds with puppies listed
+          </h2>
+          <p className="mt-3 max-w-2xl leading-relaxed text-muted">
+            {withPuppies.length} of the {breeds.length} breeds we raise have
+            pups on the ground right now, reserved ones included, since those
+            litters often have a sibling left.{" "}
+            {withPuppies.length < breeds.length
+              ? "The rest run on a waitlist, and we are happy to put your name down."
+              : "Ask us about a future litter and we will put your name down."}
+          </p>
+
+          <div className="mt-8 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+            {groupNames.map((group) => (
+              <div key={group}>
+                <h3 className="mb-2 border-b border-line pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
+                  {group}
                 </h3>
-                <p className="truncate text-xs text-muted">
-                  {b.group} · {b.size}
-                </p>
+                <ul className="space-y-1.5 text-sm">
+                  {withPuppies
+                    .filter((b) => b.group === group)
+                    .map((b) => (
+                      <li key={b.id}>
+                        <Link
+                          href={`/breeds/${b.slug}`}
+                          className="text-ink-soft hover:text-clay"
+                        >
+                          {b.name}
+                        </Link>{" "}
+                        <span className="text-muted">({b._count.puppies})</span>
+                      </li>
+                    ))}
+                </ul>
               </div>
-              <span className="shrink-0 text-xs font-semibold text-muted">
-                {b._count.puppies > 0 ? `${b._count.puppies} available` : "Waitlist"}
-              </span>
-            </Link>
-          ))}
-        </div>
-        <div className="mt-8 text-center">
+            ))}
+          </div>
+
           <Link
             href="/breeds"
-            className="text-sm font-semibold text-clay hover:underline"
+            className="mt-8 inline-block text-sm font-semibold text-clay hover:underline"
           >
-            See all {breeds.length} breeds &rarr;
+            All {breeds.length} breeds, with photos and temperament notes
           </Link>
         </div>
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/*  CTA band                                                        */}
+      {/*  Visiting                                                        */}
       {/* ---------------------------------------------------------------- */}
-      <section className="mx-auto max-w-6xl px-5 pb-8 sm:px-8">
-        <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-ink px-8 py-14 text-center sm:px-16">
-          <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-clay/30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -right-10 h-64 w-64 rounded-full bg-sage/20 blur-3xl" />
-          <p className="eyebrow mb-4 text-clay-soft">Thinking it over?</p>
-          <h2 className="mx-auto max-w-2xl font-display text-3xl font-semibold text-bone sm:text-4xl">
-            Come meet a puppy before you decide.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-bone/70">
-            Visits are by appointment so each family gets our full attention.
-            Tell us a little about your home and we&rsquo;ll help you find the
-            right match, no pressure, ever.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 rounded-full bg-bone px-7 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-clay-soft"
-            >
-              Arrange a visit
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <path d="M6 3l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+        <div className="grid gap-10 rounded-[var(--radius-xl)] border border-line bg-paper p-7 sm:p-10 lg:grid-cols-2">
+          <div>
+            <h2 className="font-display text-2xl font-semibold text-ink">
+              Coming to see us
+            </h2>
+            <p className="mt-3 leading-relaxed text-ink-soft">
+              We keep visits to one family at a time so the pups are not
+              handled all day and you are not rushed. Most people stay about an
+              hour. Wear boots you do not mind, the lane is mud from March to
+              May.
+            </p>
+            <address className="mt-6 space-y-1 text-sm not-italic text-ink-soft">
+              <p>Willowbrook, 412 Hollow Road</p>
+              <p>Willow Hollow, Vermont</p>
+              <p className="pt-2 text-muted">
+                Thursday to Sunday, 10am&ndash;4pm, by appointment
+              </p>
+            </address>
+          </div>
+
+          <div className="lg:border-l lg:border-line lg:pl-10">
+            <p className="text-sm leading-relaxed text-muted">
+              Texting is the fastest way to reach us, we are usually outside
+              with the dogs. Email if you would rather write at length about
+              what you are looking for, and we will answer properly.
+            </p>
+            <ul className="mt-5 space-y-2 text-sm">
+              <li>
+                <a href={PHONE_HREF} className="font-semibold text-ink hover:text-clay">
+                  {PHONE}
+                </a>
+                <span className="text-muted"> · call or text</span>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${EMAIL}`}
+                  className="break-all font-semibold text-ink hover:text-clay"
+                >
+                  {EMAIL}
+                </a>
+              </li>
+            </ul>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href="/contact"
+                className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-bone hover:bg-clay-deep"
+              >
+                Ask about a puppy
+              </Link>
+              <Link
+                href="/puppies"
+                className="rounded-full px-5 py-2.5 text-sm font-semibold text-ink ring-1 ring-inset ring-ink/20 hover:text-clay hover:ring-clay"
+              >
+                Browse the nursery
+              </Link>
+            </div>
           </div>
         </div>
       </section>

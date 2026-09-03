@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Image from "next/image";
+import { isSamplePhoto } from "./portrait";
 import Link from "next/link";
 
 type Breed = { id: string; name: string };
@@ -228,7 +229,14 @@ export function PuppyForm({
                         </svg>
                       </div>
                     ) : (
-                      <Image src={m.url} alt="" fill sizes="56px" className="object-cover" />
+                      <Image
+                        src={m.url}
+                        alt=""
+                        fill
+                        sizes="56px"
+                        unoptimized={isSamplePhoto(m.url)}
+                        className="object-cover"
+                      />
                     )}
                   </div>
                   <span className="flex-1 truncate text-xs text-muted">

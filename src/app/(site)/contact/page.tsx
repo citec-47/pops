@@ -26,7 +26,7 @@ export default function ContactPage() {
           </p>
 
           <dl className="mt-10 space-y-6">
-            <ContactRow label="Email" value="hello@willowbrook.test" href="mailto:hello@willowbrook.test" />
+            <ContactRow label="Email" value="careforepuppies21@gmail.com" href="mailto:careforepuppies21@gmail.com" />
             <ContactRow label="Phone & text" value="(555) 123-4567" href="tel:+15551234567" />
             <ContactRow label="Where we are" value="Willow Hollow, Vermont" />
             <ContactRow label="Visiting hours" value="By appointment, Thu to Sun" />

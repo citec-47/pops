@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { isSamplePhoto } from "./portrait";
 
 type ActionState = { error?: string } | undefined;
 type FormAction = (
@@ -81,7 +82,14 @@ export function BreedForm({
         <div className="flex items-center gap-4">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-line bg-bone-deep">
             {heroImage ? (
-              <Image src={heroImage} alt="" fill sizes="96px" className="object-cover" />
+              <Image
+                src={heroImage}
+                alt=""
+                fill
+                sizes="96px"
+                unoptimized={isSamplePhoto(heroImage)}
+                className="object-cover"
+              />
             ) : (
               <span className="flex h-full w-full items-center justify-center text-xs text-muted">
                 No photo
