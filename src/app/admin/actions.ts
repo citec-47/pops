@@ -9,11 +9,14 @@ import {
   destroySession,
   getSession,
 } from "@/lib/auth";
+import { nextPriceCents } from "@/lib/pricing";
 import {
   puppySchema,
   loginSchema,
   breedSchema,
   slugify,
+  priceAdjustSchema,
+  puppyPriceSchema,
 } from "@/lib/validation";
 
 type ActionState = { error?: string } | undefined;
@@ -311,4 +314,105 @@ export async function deleteBreedAction(formData: FormData) {
   revalidatePath("/admin/breeds");
   revalidatePath("/breeds");
   revalidatePath("/");
+}
+
+/* -------------------------------- Prices -------------------------------- */
+
+export type PriceActionState = { error?: string; message?: string } | undefined;
+
+/** Every path that shows a price somewhere. */
+function revalidatePrices() {
+  revalidatePath("/admin/prices");
+  revalidatePath("/admin/puppies");
+  revalidatePath("/admin");
+  revalidatePath("/puppies");
+  revalidatePath("/");
+}
+
+/**
+ * Raise or lower prices in bulk, optionally narrowed to one breed and/or one
+ * status. Percentages compound off each puppy's current price, so a listing
+ * that was priced up or down by hand keeps its relative position.
+ */
+export async function adjustPricesAction(
+  _prev: PriceActionState,
+  formData: FormData,
+): Promise<PriceActionState> {
+  await requireAdmin();
+
+  const parsed = priceAdjustSchema.safeParse({
+    mode: formData.get("mode"),
+    direction: formData.get("direction"),
+    value: formData.get("value"),
+    breedId: formData.get("breedId"),
+    status: formData.get("status"),
+    roundTo50: formData.get("roundTo50") === "on",
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+  }
+  const { mode, direction, value, breedId, status, roundTo50 } = parsed.data;
+
+  if (mode === "percent" && direction === "decrease" && value >= 100) {
+    return { error: "A cut of 100% or more would zero out every price." };
+  }
+
+  const where = {
+    ...(breedId ? { breedId } : {}),
+    ...(status ? { status } : {}),
+  };
+  const puppies = await prisma.puppy.findMany({
+    where,
+    select: { id: true, priceCents: true },
+  });
+  if (puppies.length === 0) {
+    return { error: "No puppies match that selection." };
+  }
+
+  const updates = [];
+  for (const p of puppies) {
+    const next = nextPriceCents(p.priceCents, {
+      mode,
+      direction,
+      value,
+      roundTo50,
+    });
+    if (next === p.priceCents) continue;
+    updates.push(
+      prisma.puppy.update({
+        where: { id: p.id },
+        data: { priceCents: next },
+      }),
+    );
+  }
+
+  if (updates.length === 0) {
+    return { message: "Nothing to change, those prices are already there." };
+  }
+
+  await prisma.$transaction(updates);
+  revalidatePrices();
+
+  const amount = mode === "percent" ? `${value}%` : `$${value}`;
+  const verb = direction === "increase" ? "Raised" : "Lowered";
+  return {
+    message: `${verb} ${updates.length} price${updates.length === 1 ? "" : "s"} by ${amount}.`,
+  };
+}
+
+/** Edit one puppy's price straight from the pricing table. */
+export async function setPuppyPriceAction(formData: FormData) {
+  await requireAdmin();
+
+  const parsed = puppyPriceSchema.safeParse({
+    id: formData.get("id"),
+    price: formData.get("price"),
+  });
+  if (!parsed.success) return;
+
+  await prisma.puppy.update({
+    where: { id: parsed.data.id },
+    data: { priceCents: Math.round(parsed.data.price * 100) },
+  });
+  revalidatePrices();
 }

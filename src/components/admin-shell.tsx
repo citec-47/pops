@@ -48,6 +48,16 @@ const NAV: NavItem[] = [
     ),
   },
   {
+    href: "/admin/prices",
+    label: "Prices",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M20.6 12.6 12.6 20.6a2 2 0 0 1-2.8 0l-6.4-6.4a2 2 0 0 1-.6-1.4V4.4a1.4 1.4 0 0 1 1.4-1.4h8.4a2 2 0 0 1 1.4.6l6.6 6.6a2 2 0 0 1 0 2.8Z" />
+        <circle cx="7.6" cy="7.6" r="1.1" />
+      </svg>
+    ),
+  },
+  {
     href: "/admin/breeds",
     label: "Breeds",
     icon: (

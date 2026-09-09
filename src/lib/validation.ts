@@ -57,3 +57,33 @@ export function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/**
+ * A bulk price change from the admin pricing page: raise or lower every
+ * matching puppy by a percentage or a flat dollar amount.
+ */
+export const priceAdjustSchema = z.object({
+  mode: z.enum(["percent", "amount"]),
+  direction: z.enum(["increase", "decrease"]),
+  value: z.coerce
+    .number()
+    .positive("Enter an amount greater than zero.")
+    .max(100_000),
+  breedId: z.string().optional().or(z.literal("")),
+  status: z
+    .enum(["AVAILABLE", "RESERVED", "SOLD"])
+    .optional()
+    .or(z.literal("")),
+  roundTo50: z.coerce.boolean().optional(),
+});
+
+export type PriceAdjustInput = z.infer<typeof priceAdjustSchema>;
+
+/** A single puppy's price, edited inline on the pricing page. */
+export const puppyPriceSchema = z.object({
+  id: z.string().min(1, "Missing puppy id."),
+  price: z.coerce
+    .number()
+    .min(0, "Price must be positive.")
+    .max(1_000_000, "That price looks too high."),
+});

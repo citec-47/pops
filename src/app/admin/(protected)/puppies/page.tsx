@@ -23,12 +23,20 @@ export default async function AdminPuppiesPage() {
             {puppies.length} in the nursery. Add, edit, or retire listings here.
           </p>
         </div>
-        <Link
-          href="/admin/puppies/new"
-          className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-bone hover:bg-clay-deep"
-        >
-          + Add a puppy
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/admin/prices"
+            className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-ink-soft hover:border-clay hover:text-clay"
+          >
+            Change prices
+          </Link>
+          <Link
+            href="/admin/puppies/new"
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-bone hover:bg-clay-deep"
+          >
+            + Add a puppy
+          </Link>
+        </div>
       </div>
 
       {puppies.length === 0 ? (
