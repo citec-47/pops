@@ -1,4 +1,4 @@
-# Willowbrook — Boutique Puppy Nursery
+# Willowbrook  — Boutique Puppy Nursery
 
 A warm, editorial website for a small breeder: browse available puppies by
 breed, read about each pup, and send a reservation inquiry. A private admin
